@@ -14,19 +14,23 @@ public class Calculator {
     //계산하기
     public void runCalculator() {
 
-        float num1;
-        String oper = "";
-        float num2;
-        float result;
 
         Scanner scanner = new Scanner(System.in);
 
         while(true) {
+            double num1;
+            String oper = "";
+            double num2;
+            double result;
 
             System.out.println("=== Java 계산기 ===");
             num1 = inputNumber(scanner, "첫", oper);
-            oper = inputOperator(scanner);
-            num2 = inputNumber(scanner, "두", oper);
+            oper = inputOperator(scanner, num1);
+            if(oper.equals("sqrt")) {
+                num2 = Double.NaN;
+            } else {
+                num2 = inputNumber(scanner, "두", oper);
+            }
             result = processCalc(num1, oper, num2);
 
             storedList.add(new Record(num1, oper, num2, result));
@@ -39,15 +43,15 @@ public class Calculator {
     }
 
     //숫자 입력
-    private float inputNumber(Scanner scanner, String message, String oper) {
-        float num = 0;
+    private double inputNumber(Scanner scanner, String message, String oper) {
+        double num = 0;
         boolean valid = false;
 
         while(!valid) {
             try {
                 System.out.print(message + " 번째 숫자를 입력하세요: ");
-                num = scanner.nextFloat();
-                if(!oper.isBlank() && (oper.equals("/") && num == 0)) {
+                num = scanner.nextDouble();
+                if(!oper.isBlank() && ((oper.equals("%") || oper.equals("/")) && num == 0)) {
                     System.out.println("0으로 나눌수 없기 때문에 다시 입력해주세요.");
                     continue;
                 }
@@ -61,15 +65,21 @@ public class Calculator {
     }
 
     //연산자 입력
-    private String inputOperator(Scanner scanner) {
+    private String inputOperator(Scanner scanner, double num1) {
         String oper = "";
         boolean valid = false;
 
         while(!valid) {
-            System.out.print("연산자를 입력하세요 (+, -, *, /): ");
+            if (num1 < 0){
+                System.out.print("연산자를 입력하세요 (+, -, *, /, %, ^): ");
+            } else {
+                System.out.print("연산자를 입력하세요 (+, -, *, /, %, ^, sqrt): ");
+            }
             oper = scanner.next();
-            if(!oper.equals("+") && !oper.equals("-") && !oper.equals("*") && !oper.equals("/")) {
+            if(!oper.equals("+") && !oper.equals("-") && !oper.equals("*") && !oper.equals("/") && !oper.equals("%") && !oper.equals("^") && !oper.equals("sqrt")) {
                 System.out.println("올바른 연산자를 입력해주세요.");
+            } else if(num1 < 0 && oper.equals("sqrt")) {
+                System.out.println("음수의 제곱근은 계산할수 없습니다. 올바른 연산자를 입력해주세요.");
             } else {
                 valid = true;
             }
@@ -78,8 +88,8 @@ public class Calculator {
     }
 
     //연산과정
-    private float processCalc(float num1, String oper, float num2) {
-        float result = 0;
+    private double processCalc(double num1, String oper, double num2) {
+        double result = 0;
         switch(oper) {
             case "+":
                 result = num1+num2;
@@ -93,8 +103,22 @@ public class Calculator {
             case "/":
                 result = num1/num2;
                 break;
+            case "%":
+                result = num1%num2;
+                break;
+            case "^":
+                result = Math.pow(num1,num2);
+                break;
+            case "sqrt":
+                result = Math.sqrt(num1);
+                break;
+
         }
-        System.out.println("결과: " + num1 + " " + oper + " " + num2 + " = " + result);
+        if(oper.equals("sqrt")) {
+            System.out.println("결과: " + num1 + " 의 제곱근 = " + result);
+        } else {
+            System.out.println("결과: " + num1 + " " + oper + " " + num2 + " = " + result);
+        }
         return result;
     }
 
@@ -122,12 +146,12 @@ public class Calculator {
 
 //연산기록 보관객체
 class Record {
-    float num1;
+    double num1;
     String oper;
-    float num2;
-    float result;
+    double num2;
+    double result;
 
-    public Record(float num1, String oper, float num2, float result) {
+    public Record(double num1, String oper, double num2, double result) {
         this.num1 = num1;
         this.oper = oper;
         this.num2 = num2;
